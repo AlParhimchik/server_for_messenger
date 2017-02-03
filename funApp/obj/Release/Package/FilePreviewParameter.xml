@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <parameter name="IIS Web Application Name" description="" value="funmessenger" tags="IisApp">
+    <parameterEntry kind="ProviderPath" scope="IisApp" match="^c:\\Users\\Саша\\Documents\\Visual\ Studio\ 2013\\Projects\\funApp\\funApp\\obj\\Release\\Package\\PackageTmp$" />
+    <parameterEntry kind="ProviderPath" scope="setAcl" match="^c:\\Users\\Саша\\Documents\\Visual\ Studio\ 2013\\Projects\\funApp\\funApp\\obj\\Release\\Package\\PackageTmp$" />
+  </parameter>
+  <parameter name="funApp.Migrations.MySqlHistoryContext-Web.config Connection String" description="" value="funApp.Migrations.MySqlHistoryContext_ConnectionString" tags="">
+    <parameterEntry kind="XmlFile" scope="c:\\Users\\Саша\\Documents\\Visual\ Studio\ 2013\\Projects\\funApp\\funApp\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='funApp.Migrations.MySqlHistoryContext']/@connectionString" />
+  </parameter>
+  <parameter name="funmessengerConnection-Web.config Connection String" description="" value="Data Source=mysql3.gear.host;Initial Catalog=messengerbd;Persist Security Info=True;User ID=messengerbd;Password=Ac354?3fO_9Z" tags="">
+    <parameterEntry kind="XmlFile" scope="c:\\Users\\Саша\\Documents\\Visual\ Studio\ 2013\\Projects\\funApp\\funApp\\obj\\Release\\Package\\PackageTmp\\Web\.config$" match="/configuration/connectionStrings/add[@name='funmessengerConnection']/@connectionString" />
+  </parameter>
+</parameters>
