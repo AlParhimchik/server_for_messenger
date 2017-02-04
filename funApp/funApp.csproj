@@ -143,24 +143,16 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\SashaController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\201702022239142_firt.cs" />
-    <Compile Include="Migrations\201702022239142_firt.Designer.cs">
-      <DependentUpon>201702022239142_firt.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201702030831226_ondeletesetnull.cs" />
-    <Compile Include="Migrations\201702030831226_ondeletesetnull.Designer.cs">
-      <DependentUpon>201702030831226_ondeletesetnull.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201702031049570_nnew.cs" />
-    <Compile Include="Migrations\201702031049570_nnew.Designer.cs">
-      <DependentUpon>201702031049570_nnew.cs</DependentUpon>
+    <Compile Include="Migrations\201702041257109_third.cs" />
+    <Compile Include="Migrations\201702041257109_third.Designer.cs">
+      <DependentUpon>201702041257109_third.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Migrations\MySqlHistoryContext.cs" />
+    <Compile Include="Models\JsonStringResult.cs" />
     <Compile Include="MySqlInitializer.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -256,23 +248,17 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\Sasha\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Sasha\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201702022239142_firt.resx">
-      <DependentUpon>201702022239142_firt.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201702030831226_ondeletesetnull.resx">
-      <DependentUpon>201702030831226_ondeletesetnull.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201702031049570_nnew.resx">
-      <DependentUpon>201702031049570_nnew.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201702041257109_third.resx">
+      <DependentUpon>201702041257109_third.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

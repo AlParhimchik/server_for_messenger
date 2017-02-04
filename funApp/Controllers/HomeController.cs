@@ -1,4 +1,5 @@
 ﻿using funApp.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace funApp.Controllers
     {
         //
         // GET: /Home/
-        public bool NewMessage(Guid senderID, Guid receiverID, string Text)
+        public bool NewMessage(int senderID, int receiverID, string Text)
         {
             using (var db = new MessengerContext())
             {
@@ -21,8 +22,8 @@ namespace funApp.Controllers
                 var receiver_user = receiver.FirstOrDefault();
                 if (sender_user != null && receiver_user != null)
                 {
-                    Guid mailID = Guid.NewGuid();
-                    var mes = new Mail { Id = mailID, receiver = receiver_user, sender = sender_user, Text = Text, Time = DateTime.Now };
+                    
+                    var mes = new Mail { receiver = receiver_user, sender = sender_user, Text = Text, Time = DateTime.Now };
                     db.Mails.Add(mes);
                     db.SaveChanges();
                     return true;
@@ -30,7 +31,7 @@ namespace funApp.Controllers
             }
             return false;
         }
-        public bool addNewUser(string FirstName, string login, string password, string LastName, string PhoneNumber)
+        public bool addNewUser(string FirstName, string login, string password, string LastName)
         {
             using (var db = new MessengerContext())
             {
@@ -38,8 +39,7 @@ namespace funApp.Controllers
                 User user_ = users.FirstOrDefault();
                 if (user_ == null)
                 {
-                    Guid id = Guid.NewGuid();
-                    User user = new User { FirstName = FirstName, LastName = LastName, PhoneNumber = PhoneNumber, Login = login, Password = password, Id = id };
+                    User user = new User { FirstName = FirstName, LastName = LastName, Login = login, Password = password };
                     db.Users.Add(user);
                     int i = db.SaveChanges();
                     if (i == 1) return true;
@@ -58,7 +58,7 @@ namespace funApp.Controllers
             }
             return false;
         }
-        public bool DeleteMessage(Guid mailID)
+        public bool DeleteMessage(int mailID)
         {
             using (var db = new MessengerContext())
             {
@@ -75,12 +75,12 @@ namespace funApp.Controllers
 
             return View();
         }
-        public bool DeleteUser(Guid userID)
+        public bool DeleteUser(int userID,string password)
         {
             using (var db = new MessengerContext())
             {
                 //db.Database.ExecuteSqlCommand("TRUNCATE TABLE [Users]");
-                var users = from u in db.Users where u.Id == userID select u;
+                var users = from u in db.Users where u.Id == userID && u.Password==password select u;
                 User user = users.FirstOrDefault();
                 if (user!=null)
                 {
@@ -95,31 +95,28 @@ namespace funApp.Controllers
             }
             return false;
         }
-        public ActionResult noIndex()
+        public JsonResult selectUsers(int userID=0)
         {
             using (var db = new MessengerContext())
             {
-
-                Guid receiverId = Guid.NewGuid();
-                Guid senderId = Guid.NewGuid();
-                Guid mailId = Guid.NewGuid();
-                var receiver = new User { Id = receiverId, FirstName = "Sasha", LastName = "Pasrhimchik", PhoneNumber = "", Login = "123", Password = "123" };
-                var sender = new User { Id = senderId, FirstName = "Sasha2", LastName = "Pasrhimchik", PhoneNumber = "", Login = "123", Password = "123" };
-                var mail = new Mail { Id = mailId, Text = "hello", receiver = receiver, sender = sender, Time = DateTime.Now };
-                db.Users.Add(sender);
-                db.Users.Add(receiver);
-                db.Mails.Add(mail);
-                ViewBag.mes = db.Database.Connection.ConnectionString;
-                int i = db.SaveChanges();
-
-                ViewBag.i = db.SaveChanges();
-                return View();
+                var items = (from u in db.Users where u.Id > userID select u).ToList();
+                JsonSerializerSettings jsSettings = new JsonSerializerSettings();
+                jsSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                
+                return Json(items, JsonRequestBehavior.AllowGet);
             }
         }
-        public bool addUser(string login, string password, string first_name, string last_name, string phone)
+        public JsonResult selectMails(int mailID=0)
         {
-            return true;
+            using (var db = new MessengerContext())
+            {
+                var items = (from u in db.Mails where u.Id > mailID select u).ToList();
+                JsonSerializerSettings jsSettings = new JsonSerializerSettings();
+                jsSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 
+                return Json(items, JsonRequestBehavior.AllowGet);
+            }
         }
+ 
     }
 }

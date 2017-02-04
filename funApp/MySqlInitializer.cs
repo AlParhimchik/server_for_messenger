@@ -32,5 +32,6 @@ namespace funApp.Models
                 }
             }
         }
+       
     }
 }

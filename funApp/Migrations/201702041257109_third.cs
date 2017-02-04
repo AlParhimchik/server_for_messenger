@@ -3,7 +3,7 @@ namespace funApp.Migrations
     using System;
     using System.Data.Entity.Migrations;
     
-    public partial class nnew : DbMigration
+    public partial class third : DbMigration
     {
         public override void Up()
         {

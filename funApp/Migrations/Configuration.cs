@@ -29,7 +29,7 @@ namespace funApp.Migrations
             context.Database.ExecuteSqlCommand("ALTER TABLE messengerbd.mails ADD CONSTRAINT FK_Mails_Users_SenderID FOREIGN KEY (SenderID) REFERENCES messengerbd.users(Id) ON UPDATE NO ACTION ON DELETE SET NULL");
             context.Database.ExecuteSqlCommand("ALTER TABLE messengerbd.mails ADD CONSTRAINT FK_Mails_Users_ReceiveID FOREIGN KEY (ReceiveID) REFERENCES messengerbd.users(Id) ON UPDATE NO ACTION ON DELETE SET NULL");
 
-            //  This method will be called after migrating to the latest version.
+            ////  This method will be called after migrating to the latest version.
 
             //  You can use the DbSet<T>.AddOrUpdate() helper extension method 
             //  to avoid creating duplicate seed data. E.g.
