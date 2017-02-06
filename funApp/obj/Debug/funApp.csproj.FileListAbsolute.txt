@@ -45,3 +45,14 @@ c:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\System
 C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\obj\Debug\funApp.csprojResolveAssemblyReference.cache
 C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\obj\Debug\funApp.Migrations.third.resources
 C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\obj\Debug\funApp.csproj.GenerateResource.Cache
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.AspNet.SignalR.Core.dll
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.AspNet.SignalR.SystemWeb.dll
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.Owin.dll
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.Owin.Host.SystemWeb.dll
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.Owin.Security.dll
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Owin.dll
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.AspNet.SignalR.Core.xml
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.AspNet.SignalR.SystemWeb.xml
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.Owin.xml
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.Owin.Host.SystemWeb.xml
+C:\Users\Саша\Documents\Visual Studio 2013\Projects\funApp\funApp\bin\Microsoft.Owin.Security.xml
