@@ -24,7 +24,12 @@ namespace funApp.hubs
             //Clients.AllExcept(Context.ConnectionId).broadcastMessage(new ChatMessage() { UserName = userName, Message = "I'm Online" });
             return base.OnConnected();
         }
+        public ConcurrentDictionary<string, string>  ReturnUsers()
+        {
 
+            return ToUsers;
+         
+        }
         public override Task OnDisconnected(bool stopCalled)
         {
             if (stopCalled) // Client explicitly closed the connection
@@ -63,15 +68,7 @@ namespace funApp.hubs
             ToUsers.TryAdd(userName, Context.ConnectionId);
         }
 
-        public bool Send(string mes)
-        {
-            // Call the broadcastMessage method to update clients.            
-            //    string fromUser;
-            //    FromUsers.TryGetValue(Context.ConnectionId, out fromUser);
-            //    Clients.AllExcept(Context.ConnectionId).broadcastMessage(new ChatMessage() { UserName = fromUser, Message = message });
-            //  
-            return true;
-        }
+        
 
         public bool SingIn(string login, string password)
         {
@@ -110,10 +107,34 @@ namespace funApp.hubs
                     var mes = new Mail { receiver = receiver_user, sender = sender_user, Text = Text, Time = DateTime.Now };
                     db.Mails.Add(mes);
                     db.SaveChanges();
+                    Clients.Caller.UpdateMessage(mes);
+                    var User = FromUsers.Where(x => x.Value == receiver_user.Login);
+                    Clients.User(User.FirstOrDefault().Key).UpdateMessage(mes);          
                     return true;
                 }
             }
             return false;
+        }
+
+        public List<User> selectUsers(int userID = 0)
+        {
+            using (var db = new MessengerContext())
+            {
+                var items = (from u in db.Users where u.Id > userID select u).ToList();
+                
+
+                return items;
+            }
+        }
+        public List<Mail> selectMails(string login,int mailID = 0)
+        {
+            using (var db = new MessengerContext())
+            {
+                var items = (from u in db.Mails where u.Id > mailID && (u.receiver.Login== login || u.sender.Login== login)   select u).ToList();
+
+
+                return items;
+            }
         }
         public bool addNewUser(string FirstName, string login, string password, string LastName)
         {
@@ -126,7 +147,12 @@ namespace funApp.hubs
                     User user = new User { FirstName = FirstName, LastName = LastName, Login = login, Password = password };
                     db.Users.Add(user);
                     int i = db.SaveChanges();
-                    if (i == 1) return true;
+                    if (i == 1)
+                    {
+                        Clients.All.updateUsers(user);
+                        return true;
+                    }
+                    
                 }
             }
             return false;
@@ -144,9 +170,12 @@ namespace funApp.hubs
                     db.Database.ExecuteSqlCommand("SET FOREIGN_KEY_CHECKS=0");
                     db.Users.Remove(user);
                     db.Database.ExecuteSqlCommand("SET FOREIGN_KEY_CHECKS=1");
-                    //db.Users.Remove(user);
                     int i = db.SaveChanges();
-                    if (i == 1) return true;
+                    if (i == 1)
+                    {
+                        Clients.All.UserDeleted(user);
+                        return true;
+                    }
                 }
             }
             return false;
