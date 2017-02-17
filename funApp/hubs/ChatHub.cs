@@ -76,7 +76,12 @@ namespace funApp.hubs
             {
                 var users = from u in db.Users where u.Login == login && u.Password == password select u;
                 User user = users.FirstOrDefault();
-                if (user != null) return true;
+                if (user != null)
+                {
+                    Clients.Caller.singedin();
+                    return true;
+                }
+                    
 
             }
             return false;    
