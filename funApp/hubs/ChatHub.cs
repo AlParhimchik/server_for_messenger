@@ -70,21 +70,22 @@ namespace funApp.hubs
 
         
 
-        public bool SingIn(string login, string password)
+        public User SingIn(string login, string password)
         {
+            User user;
             using (var db = new MessengerContext())
             {
                 var users = from u in db.Users where u.Login == login && u.Password == password select u;
-                User user = users.FirstOrDefault();
-                if (user != null)
-                {
-                    Clients.Caller.singedin();
-                    return true;
-                }
+                user = users.FirstOrDefault();
+                //if (user != null)
+                //{
+                //    //Clients.Caller.singedin();
+                //    return true;
+                //}
                     
 
             }
-            return false;    
+            return user;    
         }
         public bool DeleteMessage(int mailID)
         {
@@ -141,7 +142,7 @@ namespace funApp.hubs
                 return items;
             }
         }
-        public bool addNewUser(string FirstName, string login, string password, string LastName)
+        public User addNewUser(string FirstName, string login, string password, string LastName)
         {
             using (var db = new MessengerContext())
             {
@@ -155,12 +156,13 @@ namespace funApp.hubs
                     if (i == 1)
                     {
                         Clients.All.updateUsers(user);
-                        return true;
+                        return user;
                     }
+  
                     
                 }
             }
-            return false;
+            return null;
         }
         public bool DeleteUser(int userID, string password)
         {
