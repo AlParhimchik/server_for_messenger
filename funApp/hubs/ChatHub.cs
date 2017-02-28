@@ -77,30 +77,32 @@ namespace funApp.hubs
             {
                 var users = from u in db.Users where u.Login == login && u.Password == password select u;
                 user = users.FirstOrDefault();
-                //if (user != null)
-                //{
-                //    //Clients.Caller.singedin();
-                //    return true;
-                //}
-                    
-
+            }
+            if (user != null)
+            {
+                var user_to_result = new User();
+                user_to_result = user;
+                user_to_result.Password = "";
+                user_to_result.Login = "";
+                Clients.Others.singedIn(user_to_result);
             }
             return user;    
         }
-        public bool DeleteMessage(int mailID)
+        //public bool DeleteMessage(int mailID)
+        //{
+        //    using (var db = new MessengerContext())
+        //    {
+        //        var mails = from u in db.Mails where u.Id == mailID select u;
+        //        Mail mail = mails.FirstOrDefault();
+        //        db.Mails.Remove(mail);
+        //        int i = db.SaveChanges();
+        //        if (i == 1) return true;
+        //    }
+        //    return false;
+        //}
+        public Mail NewMessage(int senderID, int receiverID, string Text)
         {
-            using (var db = new MessengerContext())
-            {
-                var mails = from u in db.Mails where u.Id == mailID select u;
-                Mail mail = mails.FirstOrDefault();
-                db.Mails.Remove(mail);
-                int i = db.SaveChanges();
-                if (i == 1) return true;
-            }
-            return false;
-        }
-        public bool NewMessage(int senderID, int receiverID, string Text)
-        {
+            Mail message=null;
             using (var db = new MessengerContext())
             {
                 var sender = from u in db.Users where u.Id == senderID select u;
@@ -109,17 +111,15 @@ namespace funApp.hubs
                 var receiver_user = receiver.FirstOrDefault();
                 if (sender_user != null && receiver_user != null)
                 {
-
-                    var mes = new Mail { receiver = receiver_user, sender = sender_user, Text = Text, Time = DateTime.Now };
-                    db.Mails.Add(mes);
+                    var belarus = TimeZoneInfo.ConvertTime(DateTime.Now,
+                    TimeZoneInfo.FindSystemTimeZoneById("Russian Standard Time"));
+                    message = new Mail { receiver = receiver_user, sender = sender_user, Text = Text, Time =belarus};
+                    db.Mails.Add(message);
                     db.SaveChanges();
-                    Clients.Caller.UpdateMessage(mes);
-                    var User = FromUsers.Where(x => x.Value == receiver_user.Login);
-                    Clients.User(User.FirstOrDefault().Key).UpdateMessage(mes);          
-                    return true;
+                    Clients.User(receiver_user.Login).UpdateMessage(message);
                 }
             }
-            return false;
+            return message;
         }
 
         public List<User> selectUsers(int userID = 0)
@@ -127,7 +127,6 @@ namespace funApp.hubs
             using (var db = new MessengerContext())
             {
                 var items = (from u in db.Users where u.Id > userID select u).ToList();
-                
 
                 return items;
             }
@@ -155,7 +154,11 @@ namespace funApp.hubs
                     int i = db.SaveChanges();
                     if (i == 1)
                     {
-                        Clients.All.updateUsers(user);
+                        var user_to_result = new User();
+                        user_to_result = user;
+                        user_to_result.Password = "";
+                        user_to_result.Login = "";
+                        Clients.Others.updateUsers(user_to_result);
                         return user;
                     }
   
@@ -180,34 +183,13 @@ namespace funApp.hubs
                     int i = db.SaveChanges();
                     if (i == 1)
                     {
-                        Clients.All.UserDeleted(user);
+                        Clients.Others.UserDeleted(user);
                         return true;
                     }
                 }
             }
             return false;
         }
-        //public JsonResult selectUsers(int userID = 0)
-        //{
-        //    using (var db = new MessengerContext())
-        //    {
-        //        var items = (from u in db.Users where u.Id > userID select u).ToList();
-        //        JsonSerializerSettings jsSettings = new JsonSerializerSettings();
-        //        jsSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-        //        return Json(items, JsonRequestBehavior.AllowGet);
-        //    }
-        //}
-        //public JsonResult selectMails(int mailID = 0)
-        //{
-        //    using (var db = new MessengerContext())
-        //    {
-        //        var items = (from u in db.Mails where u.Id > mailID select u).ToList();
-        //        JsonSerializerSettings jsSettings = new JsonSerializerSettings();
-        //        jsSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-
-        //        return JsonConvert.DeserializeObject(items);
-        //    }
-        //}
+        
     }
 }
