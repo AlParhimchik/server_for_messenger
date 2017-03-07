@@ -75,7 +75,11 @@ namespace funApp.hubs
             User user;
             using (var db = new MessengerContext())
             {
-                var users = from u in db.Users where u.Login == login && u.Password == password select u;
+                var login_qout=string.Format(@"""{0}""",login);
+                var password_qout = string.Format(@"""{0}""", password);
+
+                var users=db.Users.SqlQuery("select * from  messengerbd.users where binary Login = " + login_qout + "  and binary  Password = " + password_qout).ToList();
+                //var users = from u in db.Users where  u.Login == login && u.Password == password select u;
                 user = users.FirstOrDefault();
             }
             if (user != null)
@@ -116,11 +120,31 @@ namespace funApp.hubs
                     message = new Mail { receiver = receiver_user, sender = sender_user, Text = Text, Time =belarus};
                     db.Mails.Add(message);
                     db.SaveChanges();
-                    Clients.User(receiver_user.Login).UpdateMessage(message);
+                    //Clients.User(receiver_user.Login).UpdateMessage(message);
+                    
+                    try
+                    {
+                        var user = ToUsers.Where(x => x.Key == receiver_user.Login);
+                        Clients.Client(user.First().Value).UpdateMessage(message);
+                        //user = FromUsers.Where(x => x.Value == receiver_user.Login);
+                        //Clients.Client(user.FirstOrDefault().Key).UpdateMessage(message);
+                        Clients.User(receiver_user.Login).UpdateMessage(message);
+
+                    }
+                    catch (Exception)
+                    {
+
+                    }
                 }
             }
             return message;
         }
+
+        public ConcurrentDictionary<string, string> showToUsers()
+        {
+            return ToUsers;
+        }
+
 
         public List<User> selectUsers(int userID = 0)
         {
