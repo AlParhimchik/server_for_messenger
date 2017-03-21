@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -20,33 +21,44 @@ namespace funApp.hubs
 
         public override Task OnConnected()
         {
-            DoConnect();
-            //Clients.AllExcept(Context.ConnectionId).broadcastMessage(new ChatMessage() { UserName = userName, Message = "I'm Online" });
-            return base.OnConnected();
-        }
-        public ConcurrentDictionary<string, string>  ReturnUsers()
-        {
-
-            return ToUsers;
-         
+             DoConnect();
+             return base.OnConnected();
         }
         public override Task OnDisconnected(bool stopCalled)
-        {
-            if (stopCalled) // Client explicitly closed the connection
+        {            
+            using (var db = new MessengerContext())
             {
-                string id = Context.ConnectionId;
-                FromUsers.TryRemove(id, out userName);
-                ToUsers.TryRemove(userName, out id);
-                //Clients.AllExcept(Context.ConnectionId).broadcastMessage(new ChatMessage() { UserName = userName, Message = "I'm Offline" });
-            }
-            else // Client timed out
-            {
-                // Do nothing here...
-                // FromUsers.TryGetValue(Context.ConnectionId, out userName);            
-                // Clients.AllExcept(Context.ConnectionId).broadcastMessage(new ChatMessage() { UserName = userName, Message = "I'm Offline By TimeOut"});                
-            }
+                var users = ToUsers.Where(x => x.Value == Context.ConnectionId).ToList();
+                var user = users.First();
+                try
+                {
+                    {
+                        var login = user.Key;
+                        var login_qout = string.Format(@"""{0}""", login);
+                        var users_db = db.Users.SqlQuery("select * from  messengerbd.users where binary Login = " + login_qout).ToList();
+                        var user_db = users_db.First();
+                        if (user_db != null)
+                        {
+                            user_db.Online = false;
+                            db.Users.Attach(user_db);
+                            db.Entry(user_db).State = EntityState.Modified;
+                            db.SaveChanges();
+                            Clients.Others.isOffline(user_db);
 
-            return base.OnDisconnected(stopCalled);
+                        }
+                        else Clients.Caller.Ecxeption("no user found in db when disconect");
+                    }
+                }
+                catch(Exception e)
+                {
+                    Clients.Caller.Ecxeption("no user found in ToUsers when delete");
+                }                    
+            }
+            string id = Context.ConnectionId;
+            Clients.Others.Offline("id "+id);
+            FromUsers.TryRemove(id, out userName);
+            ToUsers.TryRemove(userName, out id);           
+        return base.OnDisconnected(stopCalled);
         }
 
         public override Task OnReconnected()
@@ -57,42 +69,90 @@ namespace funApp.hubs
 
         private void DoConnect()
         {
-            userName = Context.Request.Headers["login"];
-            if (userName == null || userName.Length == 0)
-            {
-                userName = Context.QueryString["login"]; // for javascript clients
-            }
-            FromUsers.TryAdd(Context.ConnectionId, userName);
-            String oldId; // for case: disconnected from Client
-            ToUsers.TryRemove(userName, out oldId);
-            ToUsers.TryAdd(userName, Context.ConnectionId);
-        }
-
-        
-
-        public User SingIn(string login, string password)
-        {
-            User user;
+            string login = Context.Request.Headers["login"];
+            string password = Context.Request.Headers["password"];
+            User user=null;
             using (var db = new MessengerContext())
             {
-                var login_qout=string.Format(@"""{0}""",login);
+                var login_qout = string.Format(@"""{0}""", login);
                 var password_qout = string.Format(@"""{0}""", password);
 
-                var users=db.Users.SqlQuery("select * from  messengerbd.users where binary Login = " + login_qout + "  and binary  Password = " + password_qout).ToList();
-                //var users = from u in db.Users where  u.Login == login && u.Password == password select u;
+                var users = db.Users.SqlQuery("select * from  messengerbd.users where binary Login = " + login_qout + "  and binary  Password = " + password_qout).ToList();
                 user = users.FirstOrDefault();
-            }
-            if (user != null)
-            {
-                var user_to_result = new User();
-                user_to_result = user;
-                user_to_result.Password = "";
-                user_to_result.Login = "";
-                Clients.Others.singedIn(user_to_result);
-            }
-            return user;    
+                if (user != null)
+                {
+                    user.Online = true;
+                    db.Users.Attach(user);
+                    db.Entry(user).State = EntityState.Modified;
+                    if (db.SaveChanges() == 1)
+                    {
+                        var user_to_result = new User();
+                        user_to_result = user;
+                        user_to_result.Password = "";
+                        user_to_result.Login = "";
+                        Clients.Others.singedIn(user_to_result);
+                        Clients.Caller.singIn(user);
+                        FromUsers.TryAdd(Context.ConnectionId, userName);
+                        ToUsers.TryAdd(userName, Context.ConnectionId);
+                    }
+                    else
+                    {
+                        Clients.Caller.Exception("error in db when change status");
+                    }
+                    
+                }
+                else
+                {
+                    string firstName = Context.Request.Headers["first_name"];
+                    string LastName = Context.Request.Headers["last_name"];
+                    if (firstName==null && LastName==null)
+                    {
+                        Clients.Caller.singIn(null);
+                    }
+                    addNewUser(firstName,login,password,LastName);
+                    
+                }
+            }       
         }
-        //public bool DeleteMessage(int mailID)
+
+        private string setChanges(string FirstName , string LastName , byte[] photo)
+        {
+            var id = Context.ConnectionId;
+            var users = ToUsers.Where(x => x.Value == id).ToList();
+            var user = users.First();
+            try
+            {
+                using (var db = new MessengerContext())
+                {
+                    var login = user.Key;
+                    var login_qout = string.Format(@"""{0}""", login);
+                    var users_db = db.Users.SqlQuery("select * from  messengerbd.users where binary Login = " + login_qout).ToList();
+                    var user_db = users_db.First();
+                    if (user_db != null)
+                    {
+                        user_db.FirstName = FirstName;
+                        user_db.LastName = LastName;
+                        user_db.Image = photo;
+                        db.Users.Attach(user_db);
+                        db.Entry(user_db).State = EntityState.Modified;
+                        if (db.SaveChanges() == 1)
+                            return "ok";
+                        else return "error in SaveChanges";
+
+                    }
+                    else
+                    {
+                        return "user is null";
+                    }
+                }
+            }
+            catch (Exception )
+            {
+                return "exception(no user in hub)";
+            }
+        }
+
+         //public bool DeleteMessage(int mailID)
         //{
         //    using (var db = new MessengerContext())
         //    {
@@ -125,10 +185,15 @@ namespace funApp.hubs
                     try
                     {
                         var user = ToUsers.Where(x => x.Key == receiver_user.Login);
-                        Clients.Client(user.First().Value).UpdateMessage(message);
-                        //user = FromUsers.Where(x => x.Value == receiver_user.Login);
-                        //Clients.Client(user.FirstOrDefault().Key).UpdateMessage(message);
-                        Clients.User(receiver_user.Login).UpdateMessage(message);
+                        if (user == null)
+                        {
+                            Clients.Caller.noUser();
+                        }
+                        else
+                        {
+                            Clients.Client(user.First().Value).UpdateMessage(message);
+                            Clients.User(receiver_user.Login).UpdateMessage(message);
+                        }
 
                     }
                     catch (Exception)
@@ -138,14 +203,11 @@ namespace funApp.hubs
                 }
             }
             return message;
-        }
-
+        }        
         public ConcurrentDictionary<string, string> showToUsers()
         {
             return ToUsers;
         }
-
-
         public List<User> selectUsers(int userID = 0)
         {
             using (var db = new MessengerContext())
@@ -182,11 +244,22 @@ namespace funApp.hubs
                         user_to_result = user;
                         user_to_result.Password = "";
                         user_to_result.Login = "";
+                        FromUsers.TryAdd(Context.ConnectionId, userName);
+                        ToUsers.TryAdd(userName, Context.ConnectionId);
                         Clients.Others.updateUsers(user_to_result);
+                        Clients.Caller.singed_Up(user);
                         return user;
+                    }
+                    else
+                    {
+                        Clients.Caller.Exception("error in db when add new user "+login);
                     }
   
                     
+                }
+                else
+                {
+                    Clients.Caller.Exception("error in db  (has already such user " + login);
                 }
             }
             return null;
